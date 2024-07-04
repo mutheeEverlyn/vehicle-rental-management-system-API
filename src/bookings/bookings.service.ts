@@ -61,7 +61,7 @@ export const bookingsData= async ()  => {
 
 export const createBookingsService = async ( bookings:any):Promise<string | null>  => {
     await db.insert(bookingsTable).values( bookings)
-    return " bookings created successfully";
+    return "bookings created successfully";
 }
 
 export const updateBookingsService = async (id: number,  bookings: any):Promise<string | null>  => {

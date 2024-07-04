@@ -20,6 +20,9 @@ importers:
       '@neondatabase/serverless':
         specifier: ^0.9.3
         version: 0.9.3
+      '@stripe/stripe-js':
+        specifier: ^4.1.0
+        version: 4.1.0
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
@@ -518,6 +521,10 @@ packages:
   '@opentelemetry/api@1.8.0':
     resolution: {integrity: sha512-I/s6F7yKUDdtMsoBWXJe8Qz40Tui5vsuKCWJEWVL+5q9sSWRzzx6v2KeNsOBEwd94j0eWkpWCH4yB6rZg9Mf0w==}
     engines: {node: '>=8.0.0'}
+
+  '@stripe/stripe-js@4.1.0':
+    resolution: {integrity: sha512-HhstGRUz/4JdbZpb26OcOf8Qb/cFR02arvHvgz4sPFLSnI6ZNHC53Jc6JP/FGNwxtrF719YyUnK0gGy4oyhucQ==}
+    engines: {node: '>=12.16'}
 
   '@types/bcrypt@5.0.2':
     resolution: {integrity: sha512-6atioO8Y75fNcbmj0G7UjI9lXN2pQ/IGJ2FWT4a/btd0Lk9lQalHLKhkgKVZ3r+spnmWUKfbMi1GEe9wyHQfNQ==}
@@ -1369,6 +1376,8 @@ snapshots:
       '@types/pg': 8.11.6
 
   '@opentelemetry/api@1.8.0': {}
+
+  '@stripe/stripe-js@4.1.0': {}
 
   '@types/bcrypt@5.0.2':
     dependencies:

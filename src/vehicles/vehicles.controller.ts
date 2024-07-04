@@ -45,7 +45,7 @@ export const createVehicle= async (c: Context) => {
 
 
         if (!createdVehicle) return c.text("vehicle not created", 404);
-        return c.json({ msg: vehicle}, 201);
+        return c.json({ msg: createdVehicle}, 201);
 
     } catch (error: any) {
         return c.json({ error: error?.message }, 400)
