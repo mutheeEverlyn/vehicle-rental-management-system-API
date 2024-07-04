@@ -1,5 +1,6 @@
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
+import Stripe from 'stripe';
 import "dotenv/config";
 import { logger } from 'hono/logger';
 import { csrf } from 'hono/csrf';
@@ -20,8 +21,52 @@ import { fleetManagementRouter } from './fleet_management/fleetManagement.router
 import { authRouter } from './auth/auth.router';
 
 
+const stripe = new Stripe('your-secret-key', {
+  apiVersion: '2024-06-20',
+});
 
 const app = new Hono()
+
+app.post('/create-payment-intent', async (c) => {
+  const { amount, currency } = await c.req.json();
+  
+  try {
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: currency,
+    });
+    return c.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    return c.json({ error: error.message }, 500);
+  }
+});
+
+app.post('/webhook', async (c) => {
+  const sig = c.req.headers.get('stripe-signature');
+  const rawBody = await c.req.text();
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, sig, 'your-webhook-secret');
+  } catch (err) {
+    return c.json({ error: `Webhook Error: ${err.message}` }, 400);
+  }
+
+  // Handle the event
+  switch (event.type) {
+    case 'payment_intent.succeeded':
+      const paymentIntent = event.data.object;
+      // Handle successful payment here
+      break;
+    // ... handle other event types
+    default:
+      console.log(`Unhandled event type ${event.type}`);
+  }
+
+  return c.json({ received: true });
+});
+
+
 app.use(cors({
   origin: '*',
   allowMethods : ['GET','POST','PUT','DELETE','OPTIONS'],

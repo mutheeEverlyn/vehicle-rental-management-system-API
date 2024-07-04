@@ -7,6 +7,7 @@ export const roleEnum = pgEnum("role", ["admin", "user", "userAdminRoleAuth"]);
 export const usersTable = pgTable("users", {
   user_id: serial("user_id").primaryKey(),
   full_name: text("full_name"),
+  password: varchar("password", { length: 100 }),
   email: varchar("email", { length: 255 }).unique(),
   contact_phone: text("contact_phone"),
   address: text("address"),
@@ -161,6 +162,13 @@ export const fleetManagementRelations = relations(fleetManagementTable, ({ one }
   }),
 }));
 
+export const AuthOnUsersRelations = relations(AuthOnUsersTable, ({ one }) => ({
+  user: one(usersTable, {
+      fields: [AuthOnUsersTable.user_id],
+      references: [usersTable.user_id]
+  })
+}));
+    
 // Type Exports
 export type tiUsers = typeof usersTable.$inferInsert;
 export type tsUsers = typeof usersTable.$inferSelect;

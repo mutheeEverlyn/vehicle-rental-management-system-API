@@ -115,9 +115,9 @@ Content-Type: application/json
 
 {
      "user_id": 2,
-     "email":"muthee.14952@students.kyu.ac.ke",
-    "password":"password",
-    "role":"admin"
+     "email":"e@gmail.com",
+    "password":"pass",
+    "role":"user"
 }
 
 ###
@@ -125,6 +125,6 @@ POST http://localhost:8000/login
 Content-Type: application/json
 
 {
-    "email": "muthee.14952@students.kyu.ac.ke",
-    "password":"password"
+    "email": "e@gmail.com",
+    "password":"pass"
 }

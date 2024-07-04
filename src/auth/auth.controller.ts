@@ -1,20 +1,9 @@
 import 'dotenv/config';
 import { Context } from 'hono';
-import { createAuthUserService, userLoginService } from './auth.service';
+import { createAuthUserService, userLoginService, emailByUserId } from './auth.service';
 import bcrypt from 'bcrypt';
 import { sign } from 'hono/jwt';
-import nodemailer from 'nodemailer';
-import ejs from 'ejs';
-import path from 'path';
-
-// Nodemailer transporter configuration
-const transporter = nodemailer.createTransport({
-    service: 'gmail', 
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+import { sendEmail } from "../mailer";
 
 export const registerUser = async (c: Context) => {
     try {
@@ -24,34 +13,28 @@ export const registerUser = async (c: Context) => {
         user.password = hashedPassword;
         const createdUser = await createAuthUserService(user);
         if (!createdUser) return c.text("User not created", 404);
+        const email = await emailByUserId(user.user_id);
+        if (!email) {
+            return c.json({ error: 'Email not found for the given user ID' }, 404);
+        }
 
-        // Render the EJS template to HTML
-        ejs.renderFile(path.join(__dirname, 'src', 'registrationEmail.ejs'), { name: user.name }, (err, html) => {
-            if (err) {
-                return c.json({ error: 'Error in rendering email template' }, 500);
-            }
-
-            // Setup email options
-            const mailOptions = {
-                from: process.env.EMAIL_USER,
-                to: user.email,
-                subject: 'Welcome to Our Service',
-                html: html
-            };
-
-            // Send email
-            transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                    return c.json({ error: 'Error in sending email' }, 500);
-                }
-            });
-        });
+        // Send the email
+        try {
+            await sendEmail(email, user.name);
+        } catch (error) {
+            console.error("Error sending welcome email:", error);
+            return c.json({ error: "failed to send  email but user registered successfull" }, 500);
+        }
 
         return c.json({ msg: createdUser }, 201);
 
     } catch (error: any) {
+        console.error("Error during registration:", error);
         return c.json({ error: error?.message }, 400);
     }
+        
+
+         
 };
 
 export const loginUser = async (c: Context) => {
@@ -66,7 +49,7 @@ export const loginUser = async (c: Context) => {
             const payload = {
                 sub: userExist?.email,
                 role: userExist?.role,
-                exp: Math.floor(Date.now() / 1000) + (60 * 1800)  // 3 hour  => SESSION EXPIRATION
+                exp: Math.floor(Date.now() / 1000) + (60 * 1800)  // 30 hour  => SESSION EXPIRATION
             };
             const secret = process.env.JWT_SECRET as string;  // secret key
             const token = await sign(payload, secret);   // create a JWT token
